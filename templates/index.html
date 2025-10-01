@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Status Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;   /* Center horizontally */
+            align-items: center;       /* Center vertically */
+            height: 100vh;             /* Full screen height */
+            margin: 0;
+            background: #f4f4f9;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 350px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        form {
+            margin-top: 10px;
+        }
+        input {
+            margin: 8px 0;
+            padding: 10px;
+            width: 90%;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        button {
+            margin-top: 15px;
+            padding: 12px;
+            width: 100%;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Patient Status Prediction</h2>
+    
+        <form method="post">
+            <input type="text" name="HAEMATOCRIT_status" placeholder="HAEMATOCRIT_status"><br>
+            <input type="text" name="HAEMOGLOBINS_status" placeholder="HAEMOGLOBINS_status"><br>
+            <input type="text" name="ERYTHROCYTE_status" placeholder="ERYTHROCYTE_status"><br>
+            <input type="text" name="LEUCOCYTE_status" placeholder="LEUCOCYTE_status"><br>
+            <input type="text" name="THROMBOCYTE_status" placeholder="THROMBOCYTE_status"><br>
+            <input type="text" name="MCH_status" placeholder="MCH_status"><br>
+            <input type="text" name="MCHC_status" placeholder="MCHC_status"><br>
+            <input type="text" name="MCV_status" placeholder="MCV_status"><br>
+            <button type="submit">Predict</button>
+        </form>
+
+        {% if prediction %}
+            <div class="result">Prediction: {{ prediction }}</div>
+        {% endif %}
+    </div>
+</body>
+</html>
