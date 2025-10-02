@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Status Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;   /* Center horizontally */
+            align-items: center;       /* Center vertically */
+            height: 100vh;             /* Full screen height */
+            margin: 0;
+            background: #535399;
+        }
+        .parent-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px; /* optional spacing between containers */
+            margin: 20px;
+        }
+
+        .container, .container2 {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 350px;
+            max-height: 90vh;
+            overflow: hidden;
+        }
+
+        /* Big border / visual separation */
+        .divider {
+            width: 6px;             /* thickness of the border */
+            background: #007bff;    /* color of the border */
+            border-radius: 3px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-scroll {
+            max-height: 400px;          /* Scroll area height */
+            overflow-y: auto;           /* Vertical scroll */
+            padding-right: 10px;        /* Avoid scrollbar overlay on input */
+        }
+        form {
+            margin-top: 10px;
+        }
+        input, select {
+            margin: 8px 0;
+            padding: 10px;
+            width: 90%;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        button, input[type="submit"] {
+            margin-top: 15px;
+            padding: 12px;
+            width: 100%;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover, input[type="submit"]:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: green;
+        }
+
+        /* POPUP MODAL STYLES */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 500px;
+            height: 200px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover { color: black; }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+         <h2>Important Announcement</h2>
+        <p>
+            Please enter information according to the laboratory results that have been performed.
+            Make sure all values are accurate to ensure correct patient status prediction.
+        </p>
+        <button onclick="closeModal()">OK</button>
+         </div>
+    
+</div>
+
+<div class="parent-container">
+    <div class="container">
+        <h2>First Assignment</h2>
+        <h2>Patient Status Prediction</h2>
+        <!-- Scrollable Form -->
+        <div class="form-scroll">
+            <form method="POST">
+                Age: <input type="number" name="age" required><br>
+                Gender: 
+                <select name="gender">
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                </select><br>
+                HAEMATOCRIT: <input type="number" step="any" name="HAEMATOCRIT_status" required><br>
+                HAEMOGLOBINS: <input type="number" step="any" name="HAEMOGLOBINS_status" required><br>
+                ERYTHROCYTE: <input type="number" step="any" name="ERYTHROCYTE_status" required><br>
+                LEUCOCYTE: <input type="number" step="any" name="LEUCOCYTE_status" required><br>
+                THROMBOCYTE: <input type="number" step="any" name="THROMBOCYTE_status" required><br>
+                MCH: <input type="number" step="any" name="MCH_status" required><br>
+                MCHC: <input type="number" step="any" name="MCHC_status" required><br>
+                MCV: <input type="number" step="any" name="MCV_status" required><br>
+                <input type="submit" value="Predict">
+            </form>
+        </div>
+
+        {% if warnings %}
+            <h3>Warning:</h3>
+            <ul>
+            {% for w in warnings %}
+                <li>{{ w }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="container2">
+        <h2>Second Assignment (Input warning parameter)</h2>
+        <h2>Warning = 1, No warning = 0</h2>
+        <!-- Scrollable Form -->
+        <div class="form-scroll">
+            <form method="POST">
+                HAEMATOCRIT: <input type="number" step="any" name="HAEMATOCRIT_status" required><br>
+                HAEMOGLOBINS: <input type="number" step="any" name="HAEMOGLOBINS_status" required><br>
+                ERYTHROCYTE: <input type="number" step="any" name="ERYTHROCYTE_status" required><br>
+                LEUCOCYTE: <input type="number" step="any" name="LEUCOCYTE_status" required><br>
+                THROMBOCYTE: <input type="number" step="any" name="THROMBOCYTE_status" required><br>
+                MCH: <input type="number" step="any" name="MCH_status" required><br>
+                MCHC: <input type="number" step="any" name="MCHC_status" required><br>
+                MCV: <input type="number" step="any" name="MCV_status" required><br>
+                <input type="submit" value="Predict">
+            </form>
+        </div>
+
+        {% if prediction %}
+            <h3>Prediction: {{ prediction }}</h3>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Show modal when page loads
+    window.onload = function() {
+        var sessionExists = "{{ session.username }}";
+        if (!sessionExists) {
+            document.getElementById('loginModal').style.display = "block";
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('loginModal').style.display = "none";
+    }
+
+    // Close modal if user clicks outside
+    window.onclick = function(event) {
+        var modal = document.getElementById('loginModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+
+</body>
+</html>
