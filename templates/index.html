@@ -117,43 +117,40 @@
 <div id="loginModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
-         <h2>Important Announcement</h2>
+        <h2>Important Announcement</h2>
         <p>
             Please enter information according to the laboratory results that have been performed.
             Make sure all values are accurate to ensure correct patient status prediction.
         </p>
         <button onclick="closeModal()">OK</button>
-         </div>
-    
+    </div>
 </div>
 
 <div class="parent-container">
+    <!-- First Assignment: Check Warnings -->
     <div class="container">
-        <h2>First Assignment</h2>
-        <h2>Patient Status Prediction</h2>
-        <!-- Scrollable Form -->
+        <h2>Patient Status Warning Check</h2>
         <div class="form-scroll">
-            <form method="POST">
-                Age: <input type="number" name="age" required><br>
+            <form method="POST" action="/check_warning" autocomplete="off">
+                Age: <input type="number" name="age" min="0" max="100" required><br>
                 Gender: 
                 <select name="gender">
                     <option value="M">Male</option>
                     <option value="F">Female</option>
                 </select><br>
-                HAEMATOCRIT: <input type="number" step="any" name="HAEMATOCRIT_status" required><br>
-                HAEMOGLOBINS: <input type="number" step="any" name="HAEMOGLOBINS_status" required><br>
-                ERYTHROCYTE: <input type="number" step="any" name="ERYTHROCYTE_status" required><br>
-                LEUCOCYTE: <input type="number" step="any" name="LEUCOCYTE_status" required><br>
-                THROMBOCYTE: <input type="number" step="any" name="THROMBOCYTE_status" required><br>
-                MCH: <input type="number" step="any" name="MCH_status" required><br>
-                MCHC: <input type="number" step="any" name="MCHC_status" required><br>
-                MCV: <input type="number" step="any" name="MCV_status" required><br>
-                <input type="submit" value="Predict">
+                HAEMATOCRIT: <input type="number" step="any" name="HAEMATOCRIT_status" min="0" max="50" step="1" autocomplete="off"  required><br>
+                HAEMOGLOBINS: <input type="number" step="any" name="HAEMOGLOBINS_status" min="0" max="20" autocomplete="off"  required><br>
+                ERYTHROCYTE: <input type="number" step="any" name="ERYTHROCYTE_status" min="0" max="10" autocomplete="off" required><br>
+                LEUCOCYTE: <input type="number" step="any" name="LEUCOCYTE_status" min="0" max="15" autocomplete="off" required><br>
+                THROMBOCYTE: <input type="number" step="any" name="THROMBOCYTE_status" min="0" max="401" autocomplete="off" required><br>
+                MCH: <input type="number" step="any" name="MCH_status" min="0" max="50" autocomplete="off" required><br>
+                MCHC: <input type="number" step="any" name="MCHC_status" min="0" max="50" autocomplete="off" required><br>
+                MCV: <input type="number" step="any" name="MCV_status" min="0" max="150" autocomplete="off" required><br>
+                <input type="submit" value="Check Warnings">
             </form>
         </div>
-
         {% if warnings %}
-            <h3>Warning:</h3>
+            <h3>Warnings:</h3>
             <ul>
             {% for w in warnings %}
                 <li>{{ w }}</li>
@@ -164,24 +161,22 @@
 
     <div class="divider"></div>
 
+    <!-- Second Assignment: Prediction -->
     <div class="container2">
-        <h2>Second Assignment (Input warning parameter)</h2>
-        <h2>Warning = 1, No warning = 0</h2>
-        <!-- Scrollable Form -->
+        <h2>Patient Status Prediction (Warning = 1 Point)</h2>
         <div class="form-scroll">
-            <form method="POST">
-                HAEMATOCRIT: <input type="number" step="any" name="HAEMATOCRIT_status" required><br>
-                HAEMOGLOBINS: <input type="number" step="any" name="HAEMOGLOBINS_status" required><br>
-                ERYTHROCYTE: <input type="number" step="any" name="ERYTHROCYTE_status" required><br>
-                LEUCOCYTE: <input type="number" step="any" name="LEUCOCYTE_status" required><br>
-                THROMBOCYTE: <input type="number" step="any" name="THROMBOCYTE_status" required><br>
-                MCH: <input type="number" step="any" name="MCH_status" required><br>
-                MCHC: <input type="number" step="any" name="MCHC_status" required><br>
-                MCV: <input type="number" step="any" name="MCV_status" required><br>
+            <form method="POST" action="/predict" autocomplete="off">
+                HAEMATOCRIT: <input type="number" name="HAEMATOCRIT_status" min="0" max="1" step="1" autocomplete="off" required><br>
+                HAEMOGLOBINS: <input type="number" name="HAEMOGLOBINS_status" min="0" max="1" step="1" autocomplete="off" required><br>
+                ERYTHROCYTE: <input type="number" name="ERYTHROCYTE_status" min="0" max="1" step="1" autocomplete="off" required><br>
+                LEUCOCYTE: <input type="number" name="LEUCOCYTE_status" min="0" max="1" step="1" autocomplete="off" required><br>
+                THROMBOCYTE: <input type="number" name="THROMBOCYTE_status" min="0" max="1" step="1" autocomplete="off" required><br>
+                MCH: <input type="number" name="MCH_status" min="0" max="1" step="1" autocomplete="off" required><br>
+                MCHC: <input type="number" name="MCHC_status" min="0" max="1" step="1" autocomplete="off" required><br>
+                MCV: <input type="number" name="MCV_status" min="0" max="1" step="1" autocomplete="off" required><br>
                 <input type="submit" value="Predict">
             </form>
         </div>
-
         {% if prediction %}
             <h3>Prediction: {{ prediction }}</h3>
         {% endif %}
@@ -191,10 +186,7 @@
 <script>
     // Show modal when page loads
     window.onload = function() {
-        var sessionExists = "{{ session.username }}";
-        if (!sessionExists) {
-            document.getElementById('loginModal').style.display = "block";
-        }
+        document.getElementById('loginModal').style.display = "block";
     }
 
     function closeModal() {
@@ -209,7 +201,6 @@
         }
     }
 </script>
-
 
 </body>
 </html>
