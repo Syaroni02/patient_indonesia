@@ -11,14 +11,6 @@ import sklearn.preprocessing
 import sklearn.utils
 import sklearn.base
 
-# Path to your project
-project_home = '/home/imamsyaroni96/patient_indonesia'
-if project_home not in sys.path:
-    sys.path = [project_home] + sys.path
-
-# Import Flask app
-from app import app as application
-
 # Determine base path for PyInstaller
 if getattr(sys, 'frozen', False):
     base_path = sys._MEIPASS  # Temporary folder where PyInstaller extracts files
@@ -138,4 +130,5 @@ if __name__ == "__main__":
 
     # Create PyWebView window
     webview.create_window("Patient Prediction App", "http://127.0.0.1:5000")
+
 
