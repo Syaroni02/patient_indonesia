@@ -1,47 +1,30 @@
-# from flask import Flask, request, render_template
-# import joblib
-# import numpy as np
-
-# app = Flask(__name__)
-
-# # Load trained model
-# model = joblib.load("SVM_patient_model.pkl")
-
-# @app.route("/", methods=["GET", "POST"])
-# def home():
-#     prediction = None
-#     if request.method == "POST":
-#         try:
-#             # Get values from form in the correct order
-#             values = [
-#                 float(request.form["HAEMATOCRIT_status"]),
-#                 float(request.form["HAEMOGLOBINS_status"]),
-#                 float(request.form["ERYTHROCYTE_status"]),
-#                 float(request.form["LEUCOCYTE_status"]),
-#                 float(request.form["THROMBOCYTE_status"]),
-#                 float(request.form["MCH_status"]),
-#                 float(request.form["MCHC_status"]),
-#                 float(request.form["MCV_status"])
-#             ]
-#             X = np.array(values).reshape(1, -1)
-#             pred = model.predict(X)[0]
-#             prediction = "Inpatient" if pred == 1 else "Outpatient"
-#         except Exception as e:
-#             prediction = f"Error: {str(e)}"
-#     return render_template("index.html", prediction=prediction)
-
-# if __name__ == "__main__":
-#     app.run(debug=True, use_reloader=False)
-
-
 from flask import Flask, request, render_template
 import joblib
 import numpy as np
+import sys
+import os
+from threading import Thread
+import webview  # <-- import webview for PyWebView
+import sklearn
+import sklearn.svm
+import sklearn.preprocessing
+import sklearn.utils
+import sklearn.base
 
-app = Flask(__name__)
+
+# Determine base path for PyInstaller
+if getattr(sys, 'frozen', False):
+    base_path = sys._MEIPASS  # Temporary folder where PyInstaller extracts files
+else:
+    base_path = os.path.abspath(".")
+
+app = Flask(__name__,
+            template_folder=os.path.join(base_path, "templates"),
+            static_folder=os.path.join(base_path, "static"))
 
 # Load trained model
-model = joblib.load("SVM_patient_model.pkl")
+model_path = os.path.join(base_path, "SVM_patient_model.pkl")
+model = joblib.load(model_path)
 
 # Reference limits for validation
 limits = {
@@ -86,41 +69,65 @@ def validate_input(values, age, gender):
 
     return warnings
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def home():
-    prediction = None
+    return render_template("index.html", warnings=[], prediction=None)
+
+@app.route("/check_warning", methods=["POST"])
+def check_warning():
     warnings = []
-    if request.method == "POST":
-        try:
-            # Example: get age and gender from form
-            age = float(request.form.get("age", 30))  # default 30
-            gender = request.form.get("gender", "M")  # default Male
+    try:
+        age = float(request.form.get("age", 30))
+        gender = request.form.get("gender", "M")
 
-            # Collect lab values
-            values = {
-                "HAEMATOCRIT_status": float(request.form["HAEMATOCRIT_status"]),
-                "HAEMOGLOBINS_status": float(request.form["HAEMOGLOBINS_status"]),
-                "ERYTHROCYTE_status": float(request.form["ERYTHROCYTE_status"]),
-                "LEUCOCYTE_status": float(request.form["LEUCOCYTE_status"]),
-                "THROMBOCYTE_status": float(request.form["THROMBOCYTE_status"]),
-                "MCH_status": float(request.form["MCH_status"]),
-                "MCHC_status": float(request.form["MCHC_status"]),
-                "MCV_status": float(request.form["MCV_status"])
-            }
+        values = {
+            "HAEMATOCRIT_status": float(request.form["HAEMATOCRIT_status"]),
+            "HAEMOGLOBINS_status": float(request.form["HAEMOGLOBINS_status"]),
+            "ERYTHROCYTE_status": float(request.form["ERYTHROCYTE_status"]),
+            "LEUCOCYTE_status": float(request.form["LEUCOCYTE_status"]),
+            "THROMBOCYTE_status": float(request.form["THROMBOCYTE_status"]),
+            "MCH_status": float(request.form["MCH_status"]),
+            "MCHC_status": float(request.form["MCHC_status"]),
+            "MCV_status": float(request.form["MCV_status"])
+        }
 
-            # Validate inputs
-            warnings = validate_input(values, age, gender)
+        warnings = validate_input(values, age, gender)
+    except Exception as e:
+        warnings = [f"Error: {str(e)}"]
 
-            # Make prediction
-            X = np.array(list(values.values())).reshape(1, -1)
-            pred = model.predict(X)[0]
-            prediction = "Inpatient" if pred == 1 else "Outpatient"
+    return render_template("index.html", warnings=warnings, prediction=None)
 
-        except Exception as e:
-            prediction = f"Error: {str(e)}"
+@app.route("/predict", methods=["POST"])
+def predict():
+    prediction = None
+    warnings = []  # Include warnings for template safety
+    try:
+        values = {
+            "HAEMATOCRIT_status": float(request.form["HAEMATOCRIT_status"]),
+            "HAEMOGLOBINS_status": float(request.form["HAEMOGLOBINS_status"]),
+            "ERYTHROCYTE_status": float(request.form["ERYTHROCYTE_status"]),
+            "LEUCOCYTE_status": float(request.form["LEUCOCYTE_status"]),
+            "THROMBOCYTE_status": float(request.form["THROMBOCYTE_status"]),
+            "MCH_status": float(request.form["MCH_status"]),
+            "MCHC_status": float(request.form["MCHC_status"]),
+            "MCV_status": float(request.form["MCV_status"])
+        }
+
+        X = np.array(list(values.values())).reshape(1, -1)
+        pred = model.predict(X)[0]
+        prediction = "Inpatient" if pred == 1 else "Outpatient"
+    except Exception as e:
+        prediction = f"Error: {str(e)}"
 
     return render_template("index.html", prediction=prediction, warnings=warnings)
 
-if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+def start_flask():
+    app.run(debug=False, threaded=True)  # <-- important for PyWebView
 
+if __name__ == "__main__":
+    # Start Flask in a separate thread
+    t = Thread(target=start_flask)
+    t.start()
+
+    # Create PyWebView window
+    webview.create_window("Patient Prediction App", "http://127.0.0.1:5000")
