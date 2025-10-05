@@ -1,21 +1,10 @@
 from flask import Flask, request, render_template
 import joblib
 import numpy as np
-import sys
 import os
-from threading import Thread
-import webview  # <-- import webview for PyWebView
-import sklearn
-import sklearn.svm
-import sklearn.preprocessing
-import sklearn.utils
-import sklearn.base
 
-# Determine base path for PyInstaller
-if getattr(sys, 'frozen', False):
-    base_path = sys._MEIPASS  # Temporary folder where PyInstaller extracts files
-else:
-    base_path = os.path.abspath(".")
+# Base path (no PyInstaller needed on PythonAnywhere)
+base_path = os.path.abspath(".")
 
 app = Flask(__name__,
             template_folder=os.path.join(base_path, "templates"),
@@ -68,9 +57,11 @@ def validate_input(values, age, gender):
 
     return warnings
 
+
 @app.route("/")
 def home():
     return render_template("index.html", warnings=[], prediction=None)
+
 
 @app.route("/check_warning", methods=["POST"])
 def check_warning():
@@ -96,6 +87,7 @@ def check_warning():
 
     return render_template("index.html", warnings=warnings, prediction=None)
 
+
 @app.route("/predict", methods=["POST"])
 def predict():
     prediction = None
@@ -120,15 +112,7 @@ def predict():
 
     return render_template("index.html", prediction=prediction, warnings=warnings)
 
-def start_flask():
-    app.run(debug=False, threaded=True)  # <-- important for PyWebView
 
+# Important: PythonAnywhere will call 'app'
 if __name__ == "__main__":
-    # Start Flask in a separate thread
-    t = Thread(target=start_flask)
-    t.start()
-
-    # Create PyWebView window
-    webview.create_window("Patient Prediction App", "http://127.0.0.1:5000")
-
-
+    app.run()
