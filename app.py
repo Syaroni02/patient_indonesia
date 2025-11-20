@@ -112,8 +112,7 @@ def predict():
 
     return render_template("index.html", prediction=prediction, warnings=warnings)
 
+if __name__ == '__main__':
+    app.run()
 
-# Important: PythonAnywhere will call 'app'
-#if __name__ == "__main__":
- #   app.run()
 
